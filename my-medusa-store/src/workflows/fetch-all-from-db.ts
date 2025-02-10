@@ -51,21 +51,35 @@ const fetchDataStep = createStep("fetch-all-data-step", async (input: FetchDataP
     console.log("fetchDataStep input:", input.table); // Log input
     const query = container.resolve(ContainerRegistrationKeys.QUERY);
     const { table, metadata, fields, filters } = input;
-
-    const { data } = await query.graph({
-        entity: table,
-        fields: fields,
-        filters: filters,
-        pagination: {
-            take: metadata.take,
-            skip: metadata.skip,
-            // order: {
-            //     name: metadata.order.name,
+    if(!metadata){
+        const { data } = await query.graph({
+            entity: table,
+            fields: fields,
+            filters: filters,
+            // pagination: {
+            //     take: metadata.take,
+            //     skip: metadata.skip,
+            //     order: {
+            //         name: metadata.order.name,
+            //     },
             // },
-        },
-    });
-
-    return new StepResponse(data);
+        });
+        return new StepResponse(data);
+    }else{
+        const { data } = await query.graph({
+            entity: table,
+            fields: fields,
+            filters: filters,
+            pagination: {
+                take: metadata.take,
+                skip: metadata.skip,
+                // order: {
+                //     name: metadata.order.name,
+                // },
+            },
+        });
+        return new StepResponse(data);
+    }
 });
 
 export const fetchAllDataWorkflow = createWorkflow(

@@ -6,7 +6,13 @@ export function Droppable(props) {
     id: props.id,
   });
   const style = {
-    color: isOver ? 'green' : undefined,
+    backgroundColor: isOver ? 'lightgreen' : undefined,
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    border: props.isDraggableEnabled ? '2px dashed #ccc' : 'none',
   };
   
   

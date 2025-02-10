@@ -920,23 +920,38 @@ export default async function seedDemoData({ container }: ExecArgs) {
     logger.error("No shipping options found. Please create shipping options first.");
     return;
   }
-
+  const { data: products } = await query.graph({
+    entity: "product",
+    fields: ["*"],
+  })
   
   const shippingOption = shippingOptions[0];
   const orders: any = [];
+  const twoMonthsBefore = new Date();
+  twoMonthsBefore.setMonth(twoMonthsBefore.getMonth() - 2);
+
+  const twoMonthsAfter = new Date();
+  twoMonthsAfter.setMonth(twoMonthsAfter.getMonth() + 2);
   for (let i = 0; i < 50; i++) {
     const customer = customers[Math.floor(Math.random() * customers.length)];
     const amount = faker.number.int({min: 1, max: 100});
+    const product = products[Math.floor(Math.random() * products.length)]
     const order = {
       email: customer.email,
       region_id: region.id,
       currency_code: Math.random() > 0.5 ? "eur" : "usd",
       items: [
         {
-          variant_id: inventoryItems[0].id,
+          title:  Math.random() > 0.5 ? "L" : "M",
           quantity: faker.number.int({min: 1, max: 10}),
-          title: "Sample Product", 
           unit_price: faker.number.int({min: 1, max: 100}),
+          subtitle: faker.commerce.productName,
+          thumbnail: faker.image.url,
+          product_id: product.id,
+          product_title: product.title,
+          product_description: product.description,
+          product_subtitle: product.subtitle,
+          variant_id: inventoryItems[0].id, //TODO can be causing problems in the future since it isen't bound to the specific product.
         },
       ],
       shipping_methods: [
@@ -955,6 +970,8 @@ export default async function seedDemoData({ container }: ExecArgs) {
       ],
       shipping_address: customer.addresses[0],
       billing_address: customer.addresses[0],
+      created_at: faker.date.between({from: twoMonthsBefore, to: twoMonthsAfter}),
+      updated_at: faker.date.between({from: twoMonthsBefore, to: twoMonthsAfter})
     };
     orders.push(order);
   }

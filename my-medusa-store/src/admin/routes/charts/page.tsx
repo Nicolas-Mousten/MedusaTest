@@ -1,50 +1,40 @@
-import React, {useState} from "react";
-import { DndContext } from "@dnd-kit/core";
-import { defineRouteConfig } from "@medusajs/admin-sdk"
-import { ChartBar } from "@medusajs/icons"
-import { faker } from "@faker-js/faker"
-import { Container, Heading } from "@medusajs/ui"
-import { Chart } from "chart.js/auto"
-import { useEffect, useRef } from "react"
+import { defineRouteConfig } from "@medusajs/admin-sdk";
+import { ChartBar, Plus } from "@medusajs/icons";
+import DragAndDropPage from "./dragAndDropPage"; 
+import { registerComponent } from "./componentStrategies";
+import ChartComponent from "./chart"; 
 
 
-import { Droppable } from "./Droppable";
-import { Draggable } from "./Draggable";
+const TableComponent = ({ id, startDate, stopDate, previousDatesCount }: { id: string; startDate?: string; previousDatesCount?: number; stopDate?: string }) => (
+  <div>
+    <h3>Table Component</h3>
+    <p>ID: {id}</p>
+    <p>Start: {startDate}</p>
+    <p>Stop: {stopDate}</p>
+    <p>previous dates count: {previousDatesCount}</p>
+  </div>
+);
 
-const ChartsPage = () => {
-  const containers = ['A', 'B', 'C'];
-  const [parent, setParent] = useState(null);
-  const draggableMarkup = (
-    <Draggable id="draggable">Drag me</Draggable>
-  );
+registerComponent(1, "Line Chart", (chart_id:string, startDate?:string, stopDate?:string, previousDatesCount?:number) => (
+  <ChartComponent id={chart_id} startDate={startDate} stopDate={stopDate} previousDatesCount={previousDatesCount} />
+));
 
-  return (
-    <DndContext onDragEnd={handleDragEnd}>
-      {parent === null ? draggableMarkup : null}
+registerComponent(2, "Test Table", (chart_id, startDate, stopDate) => <TableComponent id={chart_id} startDate={startDate} stopDate={stopDate} />);
 
-      {containers.map((id) => (
-        // We updated the Droppable component so it would accept an `id`
-        // prop and pass it to `useDroppable`
-        <Droppable key={id} id={id}>
-          {parent === id ? draggableMarkup : 'Drop here'}
-        </Droppable>
-      ))}
-    </DndContext>
-  );
+const data = [
+  { id: "chart-1", componentType: 1 },
+  { id: "chart-2", componentType: 2 },
+  { id: "chart-3", componentType: 1 },
+  { id: "chart-4", componentType: 2 },
+];
 
-  function handleDragEnd(event) {
-    const {over} = event;
-
-    // If the item is dropped over a container, set it as the parent
-    // otherwise reset the parent to `null`
-    setParent(over ? over.id : null);
-  }
+const Page = () => {
+  return <DragAndDropPage initial_data={data} />;
 };
-
 
 export const config = defineRouteConfig({
   label: "Charts",
   icon: ChartBar,
-})
+});
 
-export default ChartsPage
+export default Page; 
