@@ -5,31 +5,37 @@ import { defineRouteConfig } from "@medusajs/admin-sdk";
 import { sdk } from "../../lib/sdk"
 import { useQuery } from "@tanstack/react-query"
 
-type chartComponentInputs = {
-  id: string;
+export type requiredFields = {
   startDate?: string;
   stopDate?: string;
   previousDatesCount?: number;
   labelSlider?: number;
 }
 
-const ChartComponent = ({ id, startDate, stopDate, previousDatesCount, labelSlider }:chartComponentInputs) => {
+type chartComponentInputs = {
+  props: {
+    id: string;
+    startDate?: string;
+    stopDate?: string;
+    previousDatesCount?: number;
+    labelSlider?: number;
+  }
+}
+
+const ChartComponent = ({ props: {id, startDate, stopDate, previousDatesCount, labelSlider}  }:chartComponentInputs) => {
   const chartRef = useRef<HTMLCanvasElement | null>(null);
-  
   //Default values for date
   const currentDate = new Date();
   currentDate.setMonth(currentDate.getMonth() - 2);
-  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-  
   //Query logic ↓
   const table = "order"
   const fields = "*,items.*,summary.paid_total"
   let filters = null;
-  if(!startDate && startDate?.length == 0){
+  if(!startDate && startDate?.length == 0){//fall back if no data given. not implemented
     filters = JSON.stringify({
       updated_at: {
-        $gte: firstDayOfMonth.toISOString(),
-        $lte: new Date().toISOString()
+        $gte: startDate,
+        $lte: stopDate
       }
     });
   }else{
@@ -41,8 +47,9 @@ const ChartComponent = ({ id, startDate, stopDate, previousDatesCount, labelSlid
     });
   }
   
+  //Change this to use Zacks backend for fetching data.
   const { data, isLoading, error } = useQuery<any>({
-    queryKey: ["fetchData", "order"],
+    queryKey: ["fetchData", "order", startDate, stopDate],
     queryFn: () => sdk.client.fetch(`/admin/fetchQuery?table=${table}&fields=${encodeURIComponent(fields)}&filters=${encodeURIComponent(filters)}`, {
       method: "GET",
     }),
@@ -57,18 +64,20 @@ const ChartComponent = ({ id, startDate, stopDate, previousDatesCount, labelSlid
     return acc;
   }, {});
 
-  let maxLabels = labelSlider || 10
   //if there are not enough datapoint when it is in week or days then it sets the surplus dates to 0
-
   const allDates = Object.keys(aggregatedData).sort();
-  const minDate = new Date(allDates[0]);
-  const maxDate = new Date(allDates[allDates.length - 1]);
+
 
   const filledData: { [key: string]: number } = {};
-  for (let d = new Date(minDate); d <= maxDate; d.setDate(d.getDate() + 1)) {
+  for (let d = new Date(startDate!); d <= new Date(stopDate!); d.setDate(d.getDate() + 1)) {
     const dateStr = d.toISOString().split("T")[0];
     filledData[dateStr] = aggregatedData[dateStr] || 0;
   }
+
+  const filledDates = Object.keys(filledData).sort(); // Ensure sorted order
+  const minDate = new Date(filledDates[0]);
+  const maxDate = new Date(filledDates[filledDates.length - 1]);
+  
   //split into days.
   //split the data over weeks. 
   //if there is to many datapoint then instead split to every second week, 
@@ -85,8 +94,11 @@ const ChartComponent = ({ id, startDate, stopDate, previousDatesCount, labelSlid
 
   const type = isCumulative ? "Accumulated Sales" : "Orders";
 
-  const minMonthYear = `${minDate.toLocaleString('default', { month: 'long' })} ${minDate.getFullYear()}`;
-  const maxMonthYear = `${maxDate.toLocaleString('default', { month: 'long' })} ${maxDate.getFullYear()}`;
+  const minDay = minDate.getDate();
+  const maxDay = maxDate.getDate();
+  
+  const minMonthYear = `${minDay} ${minDate.toLocaleString('default', { month: 'long' })} ${minDate.getFullYear()}`;
+  const maxMonthYear = `${maxDay} ${maxDate.toLocaleString('default', { month: 'long' })} ${maxDate.getFullYear()}`;
 
   useEffect(() => {
     //Chart logic ↓
