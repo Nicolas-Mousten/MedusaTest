@@ -1,17 +1,9 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk";
-import { ChartBar } from "@medusajs/icons";
-import DragAndDropComponent from "./dragAndDropComponent"; 
+import { ChartBar, Plus } from "@medusajs/icons";
+import DragAndDropPage from "./dragAndDropPage"; 
 import { registerComponent } from "./componentStrategies";
-import ChartComponent from "./chartComponent"; 
-import { chartRequiredFields } from "./chartComponent"; 
+import ChartComponent from "./chart"; 
 
-
-const tableRequiredFields = {
-  id: "", 
-  startDate: "", 
-  previousDatesCount: "", 
-  stopDate: ""
-}
 
 const TableComponent = ({ id, startDate, stopDate, previousDatesCount }: { id: string; startDate?: string; previousDatesCount?: number; stopDate?: string }) => (
   <div>
@@ -23,16 +15,21 @@ const TableComponent = ({ id, startDate, stopDate, previousDatesCount }: { id: s
   </div>
 );
 
-registerComponent(1, "Line Chart", chartRequiredFields, (props) => (
-  <ChartComponent props={props} />//the code work got no idea what is happening with props, it should be fine not expecting an id.
+registerComponent(1, "Line Chart", (chart_id:string, startDate?:string, stopDate?:string, previousDatesCount?:number) => (
+  <ChartComponent id={chart_id} startDate={startDate} stopDate={stopDate} previousDatesCount={previousDatesCount} />
 ));
 
-registerComponent(2, "Test Table", tableRequiredFields, (props) => 
-<TableComponent id={props.id} startDate={props.startDate} stopDate={props.stopDate} />
-);
+registerComponent(2, "Test Table", (chart_id, startDate, stopDate) => <TableComponent id={chart_id} startDate={startDate} stopDate={stopDate} />);
+
+const data = [
+  { id: "chart-1", componentType: 1 },
+  { id: "chart-2", componentType: 2 },
+  { id: "chart-3", componentType: 1 },
+  { id: "chart-4", componentType: 2 },
+];
 
 const Page = () => {
-  return <DragAndDropComponent />;
+  return <DragAndDropPage initial_data={data} />;
 };
 
 export const config = defineRouteConfig({

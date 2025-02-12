@@ -1,114 +1,122 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 import { getAllRegisteredComponents } from "./componentStrategies";
-import { Button, Drawer, Text, Label, RadioGroup, Input } from "@medusajs/ui";
+
 
 type EditDrawerInput = {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  addChart: (componentId: number, props: { [key: string]: any }) => void;
-};
+  addChart: (componentId: number, startDate: string, stopDate: string, previousDatesCount: number | undefined) => void
+}
 
-const EditDrawerStickyFooter = ({ isOpen, setIsOpen, addChart }: EditDrawerInput) => {
+
+const editDrawerStickyFooter = ({ isOpen, setIsOpen, addChart }:EditDrawerInput) => {
   const [componentsList, setComponentsList] = useState<any[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | undefined>(undefined);
-  const [selectedData, setSelectedData] = useState<any>();
+  const [startDate, setStartDate] = useState<string>("");
+  const [stopDate, setStopDate] = useState<string>("");
+  const [previousDatesCount, setPreviousDatesCount] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     const registeredComponents = getAllRegisteredComponents();
     setComponentsList(registeredComponents);
   }, []);
 
-  const handleRadioChange = (value: string, data: any) => {
-    if (selectedOption !== value) {
-      setSelectedOption(value);
-      setSelectedData(data);
-    }
+  const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedOption(event.target.value);
+  };
+  
+  const handleStartDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setStartDate(event.target.value);
+  };
+
+  const handleStopDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setStopDate(event.target.value);
+  };
+
+  const handlePreviousDatesCountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPreviousDatesCount(Number(event.target.value));
   };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
+    
+    console.log("Selected Option:", selectedOption);
+    console.log("Start Date:", startDate);
+    console.log("Stop Date:", stopDate);
+    console.log("Previous Dates Count:", previousDatesCount);
 
-    if (selectedOption && selectedData) {
-      const updatedProps: { [key: string]: any } = {};
-
-      Object.keys(selectedData).forEach((key) => {
-        const inputElement = document.getElementById(`input_${key}`) as HTMLInputElement;
-        if (inputElement) {
-          updatedProps[key] = inputElement.value;
-        }
-      });
-
-      addChart(Number(selectedOption), updatedProps);
-      setSelectedOption(undefined);
-      setSelectedData(undefined);
+    if (selectedOption) {
+      addChart(Number(selectedOption), startDate, stopDate, previousDatesCount);
     }
-
     setIsOpen(false);
   };
 
-  const renderInput = (value: any, key: string) => {
-    if (typeof value === "number") {
-      return <Input id={`input_${key}`} type="number" defaultValue={value} />;
-    } else if (value instanceof Date) {
-      return <Input id={`input_${key}`} type="date" defaultValue={value.toISOString().split("T")[0]} />;
-    } else {
-      return <Input id={`input_${key}`} type="text" defaultValue={value} />;
-    }
-  };
-
   return (
-    <Drawer.Content>
-      <Drawer.Header>
-        <Drawer.Title>Add tools</Drawer.Title>
-      </Drawer.Header>
+    <>
+      {/* Overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50"
+          onClick={() => setIsOpen(false)}
+        ></div>
+      )}
 
-      <Drawer.Body className="p-4">
-        <Text>Types of reporting tools:</Text>
+      {/* Drawer */}
+      <div
+        className={`fixed inset-y-0 right-0 w-96 bg-white shadow-lg transform transition-transform duration-300 flex flex-col ${
+          isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        {/* Header */}
+        <div className="p-4 border-b">
+          <h2 className="text-lg font-semibold">Add tools</h2>
+        </div>
+        
+        {/* Scrollable Content */}
         <form onSubmit={handleSubmit}>
           <div className="flex-1 overflow-y-auto p-4">
-            <RadioGroup
-              value={selectedOption}
-              onValueChange={(value) => {
-                const selectedComponent = componentsList.find((c) => c.id.toString() === value);
-                if (selectedComponent) {
-                  handleRadioChange(value, selectedComponent.constructor);
-                }
-              }}
-            >
-              {componentsList.map((component) => (
-                <div key={component.id} className="flex items-center gap-x-3 mb-2">
-                  <RadioGroup.Item value={component.id.toString()} id={`radio_${component.id}`} />
-                  <Label htmlFor={`radio_${component.id}`} weight="plus">
-                    {component.name}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-            <br />
-            {selectedData && (
-              <div>
-                {Object.keys(selectedData).map((key) => (
-                  <div key={key}>
-                    {key}: {renderInput(selectedData[key], key)}
-                  </div>
-                ))}
+            {componentsList.map((component) => (
+              <div key={component.id} className="mb-2">
+                <label>
+                  <input
+                    type="radio"
+                    value={component.id.toString()}
+                    checked={selectedOption === component.id.toString()}
+                    onChange={handleRadioChange}
+                  />
+                  {component.name}
+                </label>
               </div>
-            )}
+            ))}
+            <br />
+
+            <div>
+              <p>Start Date: <input type="date" value={startDate} onChange={handleStartDateChange} /></p>
+              <p>Stop Date: <input type="date" value={stopDate} onChange={handleStopDateChange} /></p>
+              <p>Previous Dates: <input type="number" value={previousDatesCount} onChange={handlePreviousDatesCountChange} /></p>
+            </div>
           </div>
 
           {/* Sticky Footer */}
-          <Drawer.Footer>
-            <Drawer.Close asChild>
-              <Button variant="secondary">Cancel</Button>
-            </Drawer.Close>
-            <Drawer.Close asChild>
-              <Button type="submit">Save</Button>
-            </Drawer.Close>
-          </Drawer.Footer>
+          <div className="sticky bottom-0 bg-white p-4 border-t flex justify-end space-x-2">
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="px-4 py-2 border rounded-md"
+            >
+              Cancel
+            </button>
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-md" type="submit">
+              Save
+            </button>
+          </div>
         </form>
-      </Drawer.Body>
-    </Drawer.Content>
+      </div>
+    </>
   );
-};
 
-export default EditDrawerStickyFooter;
+
+
+}
+
+export default editDrawerStickyFooter;
