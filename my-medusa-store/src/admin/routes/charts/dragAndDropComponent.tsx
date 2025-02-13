@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { Plus } from "@medusajs/icons";
-import { getComponent } from "./componentStrategies";
-import EditDrawerStickyFooter from "./edit_component";
+import { getComponent } from "./ComponentStrategies";
+import CreateDrawerStickyFooter from "./CreateComponent";
 import { Container } from "@medusajs/ui";
 import { Drawer } from "@medusajs/ui";
 
-import { DroppableSlot } from "./droppableSlot";
-import { DraggableItem } from "./draggableItem";
+import { DroppableSlot } from "./DroppableSlotComponent";
+import { DraggableItem } from "./DraggableItemComponent";
 
 type dragAndDropInput = 
   {
@@ -19,7 +19,6 @@ type dragAndDropInput =
 
 const DragAndDropComponent = () => {
   const [isDraggableEnabled, setIsDraggableEnabled] = useState(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [charts, setCharts] = useState<dragAndDropInput>([]);
   const prevDraggableEnabledRef = useRef(isDraggableEnabled);
 
@@ -36,20 +35,15 @@ const DragAndDropComponent = () => {
     }
   }, []);
 
-  const addChart = (componentId, props) => {
+  const addChart = (componentId: number, props:{}) => {
     const newChart = {
       componentType: componentId,
       props: {id: `chart-${charts.length + 1}`, ...props}
     };
-    console.log("The new chart: ", newChart)
     setCharts([...charts, newChart]);
   };
 
-  useEffect(() => {
-    console.log("Updated charts:", charts);
-  }, [charts]);
-
-  const handleDragEnd = (event) => {
+  const handleDragEnd = (event: { active: any; over: any; }) => {
     const { active, over } = event;
   
     if (!over) {
@@ -90,12 +84,12 @@ const DragAndDropComponent = () => {
         {isDraggableEnabled && (
           <Drawer>
             <Drawer.Trigger asChild>
-              <button style={{marginRight: "16px"}} onClick={() => setIsDrawerOpen(true)}>
+              <button style={{marginRight: "16px"}}>
                 <Plus />
               </button>
             </Drawer.Trigger>
             <Drawer.Content>
-              <EditDrawerStickyFooter isOpen={isDrawerOpen} setIsOpen={setIsDrawerOpen} addChart={addChart} />
+              <CreateDrawerStickyFooter addChart={addChart} />
             </Drawer.Content>
           </Drawer>
         )}
@@ -109,8 +103,8 @@ const DragAndDropComponent = () => {
         <Container style={{marginTop: "8px"}} className="flex flex-col gap-x-4 gap-y-3 xl:flex-row xl:items-start">
           <div className="flex w-full flex-col gap-y-3">
           {charts
-              .filter((componentItem, index) => index % 2 === 0)
-              .map((componentItem, index) => (
+              .filter((_componentItem, index) => index % 2 === 0)
+              .map((componentItem) => (
                 <div
                   key={componentItem.props.id}
                   style={{
@@ -137,8 +131,8 @@ const DragAndDropComponent = () => {
           </div>
           <div className="flex w-full max-w-[100%] flex-col gap-y-3 xl:mt-0 xl:max-w-[50%]">
           {charts
-              .filter((componentItem, index) => index % 2 !== 0)
-              .map((componentItem, index) => (
+              .filter((_componentItem, index) => index % 2 !== 0)
+              .map((componentItem) => (
                 <div
                   key={componentItem.props.id}
                   style={{

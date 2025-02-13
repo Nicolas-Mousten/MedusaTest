@@ -1,0 +1,47 @@
+// import { defineRouteConfig } from "@medusajs/admin-sdk";
+// import { ChartBar } from "@medusajs/icons";
+// import DragAndDropComponent from "./DragAndDropComponent"; 
+// import { registerComponent } from "./ComponentStrategies";
+// import ChartDataComponent from "./ChartDataComponent"; 
+// import { chartRequiredFields } from "./ChartDataComponent"; 
+// import { useEffect } from 'react';
+
+
+// const tableRequiredFields = {
+//   id: "", 
+//   startDate: "", 
+//   previousDatesCount: "", 
+//   stopDate: ""
+// }
+
+// const TableComponent = ({ id, startDate, stopDate, previousDatesCount }: { id: string; startDate?: string; previousDatesCount?: number; stopDate?: string }) => (
+//   <div>
+//     <h3>Table Component</h3>
+//     <p>ID: {id}</p>
+//     <p>Start: {startDate}</p>
+//     <p>Stop: {stopDate}</p>
+//     <p>previous dates count: {previousDatesCount}</p>
+//   </div>
+// );
+
+// const Page = () => {
+//   useEffect(() => {
+//     registerComponent(1, "Line Chart", chartRequiredFields, (props) => (
+//       <ChartDataComponent props={props} />
+//     ));
+
+//     registerComponent(2, "Test Table", tableRequiredFields, (props) => (
+//       <TableComponent id={props.id} startDate={props.startDate} stopDate={props.stopDate} />
+//     ));
+//   }, []);  // Only register once on mount
+
+//   return <DragAndDropComponent />;
+// };
+
+
+// export const config = defineRouteConfig({
+//   label: "Charts",
+//   icon: ChartBar,
+// });
+
+// export default Page; 

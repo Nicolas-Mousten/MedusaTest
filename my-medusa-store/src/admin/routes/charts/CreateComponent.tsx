@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
-import { getAllRegisteredComponents } from "./componentStrategies";
+import { getAllRegisteredComponents } from "./ComponentStrategies";
 import { Button, Drawer, Text, Label, RadioGroup, Input } from "@medusajs/ui";
 
 type EditDrawerInput = {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
   addChart: (componentId: number, props: { [key: string]: any }) => void;
 };
 
-const EditDrawerStickyFooter = ({ isOpen, setIsOpen, addChart }: EditDrawerInput) => {
+const CreateDrawerStickyFooter = ({ addChart }: EditDrawerInput) => {
   const [componentsList, setComponentsList] = useState<any[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | undefined>(undefined);
   const [selectedData, setSelectedData] = useState<any>();
@@ -42,8 +40,6 @@ const EditDrawerStickyFooter = ({ isOpen, setIsOpen, addChart }: EditDrawerInput
       setSelectedOption(undefined);
       setSelectedData(undefined);
     }
-
-    setIsOpen(false);
   };
 
   const renderInput = (value: any, key: string) => {
@@ -111,4 +107,4 @@ const EditDrawerStickyFooter = ({ isOpen, setIsOpen, addChart }: EditDrawerInput
   );
 };
 
-export default EditDrawerStickyFooter;
+export default CreateDrawerStickyFooter;

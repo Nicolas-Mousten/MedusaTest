@@ -24,4 +24,10 @@ module.exports = defineConfig({
       },
     },
   ],
+  plugins: [
+    {
+      resolve: "report-plugin",
+      options: {}
+    }
+  ]
 })

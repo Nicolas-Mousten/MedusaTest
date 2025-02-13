@@ -1,0 +1,9 @@
+{
+  "version": "v1",
+  "packages": {
+    "report-plugin": {
+      "signature": "8455b5fed0fc6e27be0c4f399fbe7d7e",
+      "file": true
+    }
+  }
+}
